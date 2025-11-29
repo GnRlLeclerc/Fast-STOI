@@ -1,0 +1,27 @@
+[build-system]
+requires = ["maturin>=1.10,<2.0"]
+build-backend = "maturin"
+
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = ["**/__pycache__", "**/.venv/**/*"]
+
+[project]
+name = "stoi"
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+dependencies = ["numpy>=1.24.4"]
+
+[dependency-groups]
+benchmarks = [
+    "pystoi>=0.4.1",
+    "pytest-benchmark>=4.0.0",
+]
+dev = ["maturin>=1.10.2", "pyrefly>=0.43.1"]
+
+[tool]
