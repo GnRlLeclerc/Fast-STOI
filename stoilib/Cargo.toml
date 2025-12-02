@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 ndarray = "0.16.1"
 ndarray-stats = "0.6.0"
+num = "0.4.3"
+windowfunctions = "0.1.1"

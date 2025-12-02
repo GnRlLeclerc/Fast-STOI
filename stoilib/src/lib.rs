@@ -1,18 +1,10 @@
 //! Rust STOI implementation
 
-use std::f64::consts::PI;
+mod resample;
 
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
-
-/// Compute the Hann window of length `n`.
-fn hann_window(n: usize) -> Array1<f64> {
-    let mut w = Array1::zeros(n);
-    for i in 0..n {
-        w[i] = 0.5 - 0.5 * ((2.0 * PI * i as f64) / (n as f64 - 1.0)).cos();
-    }
-    w
-}
+use windowfunctions::{Symmetry, WindowFunction, window};
 
 /// Compute the L2 norm of a frame.
 fn norm_l2(frame: ArrayView1<'_, f64>) -> f64 {
@@ -27,9 +19,9 @@ pub fn remove_silent_frames(
     hop_length: usize,
 ) -> (Array1<f64>, Array1<f64>) {
     // 1. Prepare Hann window
-    let hann = hann_window(frame_length + 2)
-        .slice(s![1..frame_length + 1])
-        .to_owned();
+    let hann = window(frame_length + 2, WindowFunction::Hann, Symmetry::Symmetric)
+        .collect::<Array1<f64>>();
+    let trimmed = hann.slice(s![1..frame_length + 1]);
 
     // 2. Compute frames and energies
     let n = 1 + (x.len() - frame_length - 1) / hop_length;
@@ -40,8 +32,8 @@ pub fn remove_silent_frames(
     for (i, start) in (0..x.len() - frame_length).step_by(hop_length).enumerate() {
         // Compute the energy for the current x frame
         let end = start + frame_length;
-        let x_frame = x.slice(s![start..end]).to_owned() * &hann;
-        let y_frame = y.slice(s![start..end]).to_owned() * &hann;
+        let x_frame = x.slice(s![start..end]).to_owned() * &trimmed;
+        let y_frame = y.slice(s![start..end]).to_owned() * &trimmed;
         x_frames.row_mut(i).assign(&x_frame);
         y_frames.row_mut(i).assign(&y_frame);
 
