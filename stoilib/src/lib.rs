@@ -1,7 +1,9 @@
 //! Rust STOI implementation
 
+mod constants;
 mod frames;
 mod resample;
+mod stft;
 
 use ndarray::prelude::*;
 
