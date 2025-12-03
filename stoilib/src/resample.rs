@@ -31,15 +31,14 @@ fn kaiser(beta: f32, half_length: usize) -> impl Iterator<Item = f64> {
 }
 
 /// Generates an apodized Kaiser window collected into an Array1.
-/// The original STOI implementation scales the window by the upsampling factor.
-fn apodized_kaiser_window(f: f64, beta: f64, half_length: usize, factor: f64) -> Array1<f64> {
+fn apodized_kaiser_window(f: f64, beta: f64, half_length: usize) -> Array1<f64> {
     let sinc_iter = ideal_sinc(f, half_length);
     let kaiser_iter = kaiser(beta as f32, half_length);
 
     Array1::from_iter(
         sinc_iter
             .zip(kaiser_iter)
-            .map(|(sinc, kaiser)| factor * sinc * kaiser),
+            .map(|(sinc, kaiser)| sinc * kaiser),
     )
 }
 
@@ -62,44 +61,28 @@ pub fn resample(x: ArrayView1<'_, f64>, from: u32, to: u32) -> Array1<f64> {
     // Compute the filter
     let filter_half_length = ((REJECTION_DB - 8.0) / (28.714 * roll_off_width)).ceil() as u32;
     let beta = 0.1102 * (REJECTION_DB - 8.7);
-    let mut filter = apodized_kaiser_window(
-        stopband_cutoff_freq,
-        beta,
-        filter_half_length as usize,
-        up as f64,
-    );
+    let mut filter =
+        apodized_kaiser_window(stopband_cutoff_freq, beta, filter_half_length as usize);
     filter /= filter.sum();
 
     // Create target array
     let target_len = x.len() as u32 * up / down;
     let mut target = Array1::<f64>::zeros(target_len as usize);
 
-    // Compute polyphase components
-    let polyphases: Vec<_> = (0..up)
-        .map(|offset| filter.slice(s![offset as isize..;up as isize]))
-        .collect();
+    // DEBUG: implementing the naive method to see if I'm correct
+    let mut upsampled =
+        Array1::<f64>::zeros(x.len() * up as usize + 2 * filter_half_length as usize);
+    // fill the upsampled array
+    for (i, &val) in x.iter().enumerate() {
+        upsampled[i * up as usize + filter_half_length as usize] = val;
+    }
 
-    for i in 0..target_len {
-        // Compute the indices of the target value and filter boundaries
-        // in the virtually upsampled (by `up`) signal
-        let virt_idx = i * down;
-        let virt_start = virt_idx.saturating_sub(filter_half_length);
-        let virt_end = virt_idx.saturating_add(filter_half_length); // inclusive
-
-        // Compute indices in the original signal
-        let x_start = (virt_start as f64 / up as f64).ceil() as usize;
-        let x_end = (virt_end as f64 / up as f64)
-            .floor()
-            .min(x.len() as f64 - 1.0) as usize; // inclusive
-
-        // Compute indices in the filter
-        let filter_start = x_start * up as usize - virt_start as usize;
-        let filter_end = x_end * up as usize - virt_start as usize; // inclusive
-
-        let filter_slice = filter.slice(s![filter_start..filter_end+1;up]);
-        let x_slice = x.slice(s![x_start..x_end + 1]);
-
-        target[i as usize] = filter_slice.dot(&x_slice);
+    for (i, y) in target.iter_mut().enumerate() {
+        let upsampled_index = i * down as usize + filter_half_length as usize;
+        *y = filter.dot(
+            &upsampled.slice(s![upsampled_index as isize - filter_half_length as isize
+                ..upsampled_index as isize + filter_half_length as isize + 1]),
+        ) * up as f64;
     }
 
     target

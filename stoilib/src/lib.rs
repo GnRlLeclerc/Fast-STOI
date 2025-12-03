@@ -1,10 +1,9 @@
 //! Rust STOI implementation
 
+mod frames;
 mod resample;
 
 use ndarray::prelude::*;
-use ndarray_stats::QuantileExt;
-use windowfunctions::{Symmetry, WindowFunction, window};
 
 /// Compute the L2 norm of a frame.
 fn norm_l2(frame: ArrayView1<'_, f64>) -> f64 {
@@ -64,6 +63,11 @@ pub fn remove_silent_frames(
 
     (x, y)
 }
+
+const DYNAMIC_RANGE: f64 = 40.0;
+const FRAME_LENGTH: usize = 256;
+const HOP_LENGTH: usize = FRAME_LENGTH / 2;
+const FS: u32 = 10_000;
 
 /// Compute the Short-Time Objective Intelligibility (STOI) measure between two signals.
 /// # Arguments
