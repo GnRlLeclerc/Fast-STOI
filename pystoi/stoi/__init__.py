@@ -24,4 +24,8 @@ def stoi(x: np.ndarray, y: np.ndarray, fs_sig: int, extended=False) -> float:
     x = x.astype(np.float64)
     y = y.astype(np.float64)
 
-    return stoi_internal(x, y, fs_sig, extended)
+    try:
+        return stoi_internal(x, y, fs_sig, extended)
+    except Warning as e:
+        print(e, "Returning 1e-5")
+        return 1e-5

@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 #[pymodule]
 mod stoi {
     use numpy::PyReadonlyArray1;
-    use pyo3::prelude::*;
+    use pyo3::{exceptions::PyWarning, prelude::*};
 
     #[pyfunction]
     fn stoi(
@@ -13,6 +13,9 @@ mod stoi {
         fs_sig: u32,
         extended: bool,
     ) -> PyResult<f64> {
-        Ok(stoilib::stoi(x.as_array(), y.as_array(), fs_sig, extended))
+        match stoilib::stoi(x.as_array(), y.as_array(), fs_sig, extended) {
+            Ok(value) => Ok(value),
+            Err(err) => Err(PyWarning::new_err(err.to_string())),
+        }
     }
 }
