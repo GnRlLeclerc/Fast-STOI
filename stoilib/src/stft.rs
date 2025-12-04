@@ -14,7 +14,7 @@ lazy_static! {
 }
 
 /// Compute the RFFT of each valid frame as indicated by the mask.
-/// Returns a real valued spectrogram
+/// Returns a real valued spectrogram of shape (frames, FFT_BINS).
 pub fn compute_frame_rffts(
     frames: ArrayView2<'_, f64>,
     mask: ArrayView1<'_, bool>,

@@ -2,6 +2,7 @@
 
 mod constants;
 mod frames;
+mod octave;
 mod resample;
 mod stft;
 
