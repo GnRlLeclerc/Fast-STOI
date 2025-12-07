@@ -30,7 +30,7 @@ pub fn from_segments(x_segments: MatMut<f64>, y_segments: MatMut<f64>) -> f64 {
                 y_sum += *y;
             });
 
-            // Substract means
+            // Compute means
             let x_mean = x_sum / SEGMENT_LENGTH as f64;
             let y_mean = y_sum / SEGMENT_LENGTH as f64;
 

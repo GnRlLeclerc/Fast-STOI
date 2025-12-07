@@ -45,7 +45,7 @@ pub fn compute_frame_rffts(frames: MatRef<f64>, mask: ColRef<bool>, count: usize
             R2C.process_with_scratch(&mut input_buffer, &mut output_buffer, &mut scratch_buffer)
                 .unwrap();
 
-            // Copy magnitude spectrum to output spectrogram
+            // Copy squared magnitude spectrum to output spectrogram
             spectrogram
                 .col_mut(index)
                 .iter_mut()

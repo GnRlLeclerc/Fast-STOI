@@ -154,7 +154,7 @@ pub fn process_frames(x: &[f64], y: &[f64]) -> (Mat<f64>, Mat<f64>, Col<bool>, u
 ///
 /// We copy the segments into a new array because we need to perform per-segment
 /// mutating operations later.
-/// Because x and y will be compared in a per-segment basis, we merge the
+/// Because x and y will be compared on a per-segment basis, we merge the
 /// n_segments and bands dimensions for efficient storage and iteration.
 pub fn segments(x_bands: MatRef<f64>) -> Mat<f64> {
     let n_bands = x_bands.ncols();
@@ -165,7 +165,7 @@ pub fn segments(x_bands: MatRef<f64>) -> Mat<f64> {
 
     for i in 0..n_segments {
         let mut segments_slice = segments.subcols_mut(i * n_bands, n_bands);
-        let bands_slice = x_bands.submatrix(i, 0, SEGMENT_LENGTH, n_bands);
+        let bands_slice = x_bands.subrows(i, SEGMENT_LENGTH);
         segments_slice.copy_from(bands_slice);
     }
 

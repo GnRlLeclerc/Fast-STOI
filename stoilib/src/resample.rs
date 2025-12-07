@@ -3,7 +3,7 @@
 use std::f64::consts::PI;
 
 use dashmap::DashMap;
-use faer::{ColRef, Row};
+use faer::prelude::*;
 use lazy_static::lazy_static;
 use num::integer;
 use windowfunctions::{Symmetry, WindowFunction, window};
@@ -11,7 +11,7 @@ use windowfunctions::{Symmetry, WindowFunction, window};
 lazy_static! {
     /// Cache precomputed filter contiguous phases.
     /// The keys are input sampling frequencies
-    static ref WINDOWS: DashMap<u32, Vec<Row<f64>>> = DashMap::new();
+    static ref WINDOWS: DashMap<u32, (isize, Vec<Row<f64>>)> = DashMap::new();
 }
 
 const REJECTION_DB: f64 = 60.0;
@@ -38,7 +38,7 @@ fn kaiser(beta: f32, half_length: usize) -> impl Iterator<Item = f64> {
     )
 }
 
-/// Generates an apodized Kaiser window collected into an Array1.
+/// Generates an apodized Kaiser window collected into a Row.
 fn apodized_kaiser_window(f: f64, beta: f64, half_length: usize) -> Row<f64> {
     let sinc_iter = ideal_sinc(f, half_length);
     let kaiser_iter = kaiser(beta as f32, half_length);
@@ -50,8 +50,9 @@ fn apodized_kaiser_window(f: f64, beta: f64, half_length: usize) -> Row<f64> {
 }
 
 /// Generates the different contiguous filter phases for efficient
-/// computation.
-fn generate_filter_phases(up: u32, down: u32) -> Vec<Row<f64>> {
+/// computation. Also returns the filter half-length.
+fn generate_filter_phases(up: u32, down: u32) -> (isize, Vec<Row<f64>>) {
+    println!("Generating filter phases");
     let stopband_cutoff_freq = 1.0 / (2.0 * up.max(down) as f64);
     let roll_off_width = stopband_cutoff_freq / 10.0;
 
@@ -63,9 +64,12 @@ fn generate_filter_phases(up: u32, down: u32) -> Vec<Row<f64>> {
     filter /= filter.sum();
 
     let up = up as usize;
-    (0..up)
-        .map(|phase| filter.iter().skip(phase).step_by(up).cloned().collect())
-        .collect()
+    (
+        filter_half_length as isize,
+        (0..up)
+            .map(|phase| filter.iter().skip(phase).step_by(up).cloned().collect())
+            .collect(),
+    )
 }
 
 /// Polyphase resampling.
@@ -90,16 +94,28 @@ pub fn resample(x: &[f64], from: u32, to: u32) -> Vec<f64> {
     // again to drop the exclusive mutable ref held by entry
     WINDOWS
         .entry(from)
-        .or_insert(generate_filter_phases(up, down));
+        .or_insert_with(|| generate_filter_phases(up, down));
     let filters = WINDOWS.get(&from).unwrap();
+    let half_length = filters.0;
+    let phases = &filters.1;
 
-    // View x as a faer Col for fast dotting with filters
-    let x = ColRef::from_slice(x);
+    // Pad the input signal with zeros at start and end
+    // to avoid bound checks during filtering
+    let mut padded_x = Col::<f64>::zeros(x.len() + 2 * (half_length / up as isize) as usize);
+    padded_x
+        .subrows_mut((half_length / up as isize) as usize, x.len())
+        .copy_from(ColRef::from_slice(x));
 
     for (i, y) in target.iter_mut().enumerate() {
-        let filter = &filters[i]; // TODO: get the phase instead
+        // Compute indices for slices
+        let upsampled_start = i as isize * down as isize - half_length;
+        let phase = (-upsampled_start).rem_euclid(up as isize);
+        let x_start = (i as isize * down as isize + phase) / up as isize;
+        let phase = &phases[phase as usize];
 
-        *y = filter * x; // TODO: proper slicing
+        let x_slice = padded_x.subrows(x_start as usize, phase.ncols());
+
+        *y = phase * &x_slice * up as f64;
     }
 
     target
