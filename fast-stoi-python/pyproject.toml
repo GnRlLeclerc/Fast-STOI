@@ -7,7 +7,12 @@ project-includes = ["**/*"]
 project-excludes = ["**/__pycache__", "**/.venv/**/*"]
 
 [project]
-name = "stoi"
+name = "fast-stoi"
+authors = [{ name = "Thibaut de Saivre", email = "thibaut2saivre@gmail.com" }]
+description = "Fast STOI implementation in Rust with Python bindings"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["rust", "stoi", "audio"]
 requires-python = ">=3.8"
 classifiers = [
   "Programming Language :: Rust",
@@ -17,12 +22,13 @@ classifiers = [
 dynamic = ["version"]
 dependencies = ["numpy>=1.24.4"]
 
+[project.optional-dependencies]
+torch = ["torch>=2.5.1"]
+
 [dependency-groups]
-benchmarks = [
-    "pystoi>=0.4.1",
-    "pytest-benchmark>=4.0.0",
-    "torch-stoi>=0.2.3",
-]
+benchmarks = ["pystoi>=0.4.1", "pytest-benchmark>=4.0.0", "torch-stoi>=0.2.3"]
 dev = ["maturin>=1.10.2", "pyrefly>=0.43.1"]
 
-[tool]
+[tool.pytest.ini_options]
+benchmark_sort = "mean"
+filterwarnings = ["ignore::UserWarning"]

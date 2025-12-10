@@ -27,9 +27,9 @@ const OCTAVE_BANDS: [(usize, usize); NUM_BANDS] = [
 /// Merge FFT spectrogram into octave bands specified by the index ranges in `OCTAVE_BANDS`.
 /// Input spectrograms have shape (FFT_BINS, num_frames).
 /// The merged output has shape (NUM_BANDS, num_frames).
-pub fn compute_octave_bands(spectrogram: MatRef<f64>) -> Mat<f64> {
+pub fn compute_octave_bands(spectrogram: MatRef<f32>) -> Mat<f32> {
     let num_frames = spectrogram.ncols();
-    let mut band_spectrogram = Mat::<f64>::zeros(NUM_BANDS, num_frames);
+    let mut band_spectrogram = Mat::<f32>::zeros(NUM_BANDS, num_frames);
 
     // Iterate over each frame
     spectrogram

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["stoilib", "pystoi"]
+members = ["fast-stoi-python", "fast-stoi"]
 
 [profile.release]
 opt-level = 3

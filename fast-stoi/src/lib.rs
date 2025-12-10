@@ -2,12 +2,12 @@
 
 mod constants;
 mod errors;
-mod upfirdn;
 mod frames;
 mod octave;
 mod resample;
 mod standard;
 mod stft;
+mod upfirdn;
 
 use crate::{
     constants::{FS, SEGMENT_LENGTH},
@@ -15,7 +15,7 @@ use crate::{
 };
 
 /// Do the full computation post resampling to 10kHz
-fn compute(x: &[f64], y: &[f64]) -> Result<f64> {
+fn compute(x: &[f32], y: &[f32]) -> Result<f32> {
     // Compute frames
     let (x_frames, y_frames, mask, count) = frames::process_frames(x, y);
 
@@ -42,12 +42,13 @@ fn compute(x: &[f64], y: &[f64]) -> Result<f64> {
 }
 
 /// Compute the Short-Time Objective Intelligibility (STOI) measure between two signals.
-/// # Arguments
+///
+/// Args:
 /// * `x` - Clean speech signal
 /// * `y` - Processed speech signal
 /// * `fs_sig` - Sampling frequency of the signals
 /// * `extended` - Whether to use the extended STOI measure
-pub fn stoi(x: &[f64], y: &[f64], fs_sig: usize, extended: bool) -> Result<f64> {
+pub fn stoi(x: &[f32], y: &[f32], fs_sig: usize, extended: bool) -> Result<f32> {
     assert!(
         x.len() == y.len(),
         "Input signals must have the same length"

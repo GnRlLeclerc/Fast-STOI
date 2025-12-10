@@ -1,6 +1,6 @@
 //! Standard STOI computation from octave segment spectrograms
 
-use std::f64::EPSILON;
+use std::f32::EPSILON;
 
 use faer::prelude::*;
 
@@ -8,8 +8,8 @@ use crate::constants::{BETA, SEGMENT_LENGTH};
 
 /// Compute the standard STOI from octave segment spectrograms of the clean and processed signals.
 /// The segments have shapes (segment_length, num_segments * num_bands).
-pub fn from_segments(x_segments: MatMut<f64>, y_segments: MatMut<f64>) -> f64 {
-    let clip_value = 10.0_f64.powf(-BETA / 20.0);
+pub fn from_segments(x_segments: MatMut<f32>, y_segments: MatMut<f32>) -> f32 {
+    let clip_value = 10.0_f32.powf(-BETA / 20.0);
     let n = x_segments.ncols();
 
     let mut similarity = 0.0;
@@ -31,8 +31,8 @@ pub fn from_segments(x_segments: MatMut<f64>, y_segments: MatMut<f64>) -> f64 {
             });
 
             // Compute means
-            let x_mean = x_sum / SEGMENT_LENGTH as f64;
-            let y_mean = y_sum / SEGMENT_LENGTH as f64;
+            let x_mean = x_sum / SEGMENT_LENGTH as f32;
+            let y_mean = y_sum / SEGMENT_LENGTH as f32;
 
             // Subtract mean and start computing resulting norm
             // at the same time
@@ -58,5 +58,5 @@ pub fn from_segments(x_segments: MatMut<f64>, y_segments: MatMut<f64>) -> f64 {
             similarity += s / (x_norm * y_norm);
         });
 
-    similarity / n as f64
+    similarity / n as f32
 }

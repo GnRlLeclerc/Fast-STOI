@@ -1,20 +1,20 @@
 use pyo3::prelude::*;
 
-/// Python bindings for stoilib
+/// Python bindings for fast-stoi
 #[pymodule]
-mod stoi {
-    use numpy::{PyReadonlyArray1, PyReadonlyArray2};
+mod fast_stoi_python {
+    use numpy::ndarray::parallel::prelude::*;
+    use numpy::{IntoPyArray, PyArray1, PyReadonlyArray1, PyReadonlyArray2};
     use pyo3::{exceptions::PyWarning, prelude::*};
-    use rayon::iter::{ParallelBridge, ParallelIterator};
 
     #[pyfunction]
     fn stoi(
-        x: PyReadonlyArray1<'_, f64>,
-        y: PyReadonlyArray1<'_, f64>,
+        x: PyReadonlyArray1<'_, f32>,
+        y: PyReadonlyArray1<'_, f32>,
         fs_sig: usize,
         extended: bool,
-    ) -> PyResult<f64> {
-        match stoilib::stoi(
+    ) -> PyResult<f32> {
+        match fast_stoi::stoi(
             x.as_slice().expect("x is not contiguous"),
             y.as_slice().expect("y is not contiguous"),
             fs_sig,
@@ -26,20 +26,21 @@ mod stoi {
     }
 
     #[pyfunction]
-    fn par_stoi(
-        x: PyReadonlyArray2<'_, f64>,
-        y: PyReadonlyArray2<'_, f64>,
+    fn par_stoi<'py>(
+        py: Python<'py>,
+        x: PyReadonlyArray2<'_, f32>,
+        y: PyReadonlyArray2<'_, f32>,
         fs_sig: usize,
         extended: bool,
-    ) -> PyResult<Vec<f64>> {
+    ) -> Bound<'py, PyArray1<f32>> {
         let x = x.as_array();
         let y = y.as_array();
 
-        Ok(x.outer_iter()
-            .zip(y.outer_iter())
-            .par_bridge()
+        x.outer_iter()
+            .into_par_iter()
+            .zip(y.outer_iter().into_par_iter())
             .map(|(x, y)| {
-                match stoilib::stoi(
+                match fast_stoi::stoi(
                     x.as_slice().expect("x is not contiguous"),
                     y.as_slice().expect("y is not contiguous"),
                     fs_sig,
@@ -49,6 +50,7 @@ mod stoi {
                     Err(_) => 1e-5,
                 }
             })
-            .collect())
+            .collect::<Vec<_>>()
+            .into_pyarray(py)
     }
 }

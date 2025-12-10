@@ -8,11 +8,11 @@ use crate::constants::{DYNAMIC_RANGE, FRAME_LENGTH, HALF_FRAME, HOP_LENGTH, SEGM
 
 struct FrameWindows {
     /// Trimmed hann window
-    pub hann: Col<f64>,
+    pub hann: Col<f32>,
     /// Hann window with half overlap with another hann window at the end
-    pub hann_start: Col<f64>,
+    pub hann_start: Col<f32>,
     /// Hann window with overlapping hann windows added at both ends
-    pub hann_center: Col<f64>,
+    pub hann_center: Col<f32>,
     // NOTE: we don't need hann end, that frame is discarded
 }
 
@@ -21,7 +21,7 @@ impl FrameWindows {
         let hann = window(FRAME_LENGTH + 2, WindowFunction::Hann, Symmetry::Symmetric)
             .skip(1)
             .take(FRAME_LENGTH)
-            .collect::<Col<f64>>();
+            .collect::<Col<f32>>();
 
         // 1. Combine hann windows to mimic slicing + overlap-adding
         let mut hann_start = hann.clone();
@@ -65,12 +65,12 @@ lazy_static! {
 /// hence why we store all frames in an intermediate 2D array.
 /// In order to avoid reallocations, we return the unfiltered 2D array along
 /// with a boolean mask indicating which frames to keep.
-pub fn process_frames(x: &[f64], y: &[f64]) -> (Mat<f64>, Mat<f64>, Col<bool>, usize) {
+pub fn process_frames(x: &[f32], y: &[f32]) -> (Mat<f32>, Mat<f32>, Col<bool>, usize) {
     // 1. Compute frames and energies
     let n = 1 + (x.len() - FRAME_LENGTH - 1) / HOP_LENGTH;
-    let mut x_frames = Mat::<f64>::zeros(FRAME_LENGTH, n);
-    let mut y_frames = Mat::<f64>::zeros(FRAME_LENGTH, n);
-    let mut energies = Col::<f64>::zeros(n);
+    let mut x_frames = Mat::<f32>::zeros(FRAME_LENGTH, n);
+    let mut y_frames = Mat::<f32>::zeros(FRAME_LENGTH, n);
+    let mut energies = Col::<f32>::zeros(n);
 
     for (i, start) in (0..x.len() - FRAME_LENGTH).step_by(HOP_LENGTH).enumerate() {
         // Compute the energy for the current x frame
@@ -97,7 +97,7 @@ pub fn process_frames(x: &[f64], y: &[f64]) -> (Mat<f64>, Mat<f64>, Col<bool>, u
             .sqrt();
 
         // Compute frame energy
-        energies[i] = 20.0 * (frame_norm + f64::EPSILON).log10();
+        energies[i] = 20.0 * (frame_norm + f32::EPSILON).log10();
     }
 
     // 2. Compute frame mask based on energies
@@ -156,12 +156,12 @@ pub fn process_frames(x: &[f64], y: &[f64]) -> (Mat<f64>, Mat<f64>, Col<bool>, u
 /// mutating operations later.
 /// Because x and y will be compared on a per-segment basis, we merge the
 /// n_segments and bands dimensions for efficient storage and iteration.
-pub fn segments(x_bands: MatRef<f64>) -> Mat<f64> {
+pub fn segments(x_bands: MatRef<f32>) -> Mat<f32> {
     let n_bands = x_bands.ncols();
     let n_frames = x_bands.nrows();
     let n_segments = n_frames.saturating_sub(SEGMENT_LENGTH) + 1;
 
-    let mut segments = Mat::<f64>::zeros(SEGMENT_LENGTH, n_segments * n_bands);
+    let mut segments = Mat::<f32>::zeros(SEGMENT_LENGTH, n_segments * n_bands);
 
     for i in 0..n_segments {
         let mut segments_slice = segments.subcols_mut(i * n_bands, n_bands);

@@ -32,6 +32,53 @@ wheels = [
 ]
 
 [[package]]
+name = "fast-stoi"
+source = { editable = "." }
+dependencies = [
+    { name = "numpy", version = "1.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+
+[package.optional-dependencies]
+torch = [
+    { name = "torch", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+
+[package.dev-dependencies]
+benchmarks = [
+    { name = "pystoi" },
+    { name = "pytest-benchmark", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pytest-benchmark", version = "5.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "torch-stoi" },
+]
+dev = [
+    { name = "maturin" },
+    { name = "pyrefly" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "numpy", specifier = ">=1.24.4" },
+    { name = "torch", marker = "extra == 'torch'", specifier = ">=2.5.1" },
+]
+provides-extras = ["torch"]
+
+[package.metadata.requires-dev]
+benchmarks = [
+    { name = "pystoi", specifier = ">=0.4.1" },
+    { name = "pytest-benchmark", specifier = ">=4.0.0" },
+    { name = "torch-stoi", specifier = ">=0.2.3" },
+]
+dev = [
+    { name = "maturin", specifier = ">=1.10.2" },
+    { name = "pyrefly", specifier = ">=0.43.1" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.16.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1411,42 +1458,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c", size = 1319958, upload-time = "2025-05-27T00:56:51.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922", size = 1201486, upload-time = "2025-05-27T00:56:49.664Z" },
-]
-
-[[package]]
-name = "stoi"
-source = { editable = "." }
-dependencies = [
-    { name = "numpy", version = "1.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
-    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-]
-
-[package.dev-dependencies]
-benchmarks = [
-    { name = "pystoi" },
-    { name = "pytest-benchmark", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "pytest-benchmark", version = "5.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "torch-stoi" },
-]
-dev = [
-    { name = "maturin" },
-    { name = "pyrefly" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "numpy", specifier = ">=1.24.4" }]
-
-[package.metadata.requires-dev]
-benchmarks = [
-    { name = "pystoi", specifier = ">=0.4.1" },
-    { name = "pytest-benchmark", specifier = ">=4.0.0" },
-    { name = "torch-stoi", specifier = ">=0.2.3" },
-]
-dev = [
-    { name = "maturin", specifier = ">=1.10.2" },
-    { name = "pyrefly", specifier = ">=0.43.1" },
 ]
 
 [[package]]

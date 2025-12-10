@@ -2,25 +2,27 @@
 
 use faer::prelude::*;
 
-/// Upfirdn implementation
-/// h: window
-/// x: input signal
-/// up: upsampling factor
-/// down: downsampling factor
+/// Upfirdn implementation to mimic scipy.signal.resample_poly
+/// internal behavior (not directly scipy.signal.upfirdn).
+///
 /// Normalization by up is applied to conserve signal energy
-pub fn upfirdn(h: &[f64], x: &[f64], up: usize, down: usize) -> Vec<f64> {
+pub fn upfirdn(h: &[f32], x: &[f32], up: usize, down: usize) -> Vec<f32> {
     // Compute contiguous filter phases
     let phase_length = (h.len() as f32 / up as f32).ceil() as usize;
     let mut phases = vec![0.0; phase_length * up];
     for phase in 0..up {
         for n in 0..phase_length {
-            phases[phase * phase_length + n] = h[n * up + phase];
+            let idx = n * up + phase;
+            if idx >= h.len() {
+                break;
+            }
+            phases[phase * phase_length + n] = h[idx];
         }
     }
 
     // Pad the input signal with zeros to avoid bound checks during filtering
     let padding = h.len() / (2 * up); // Padding at both ends
-    let mut padded_x = vec![0.0; x.len() + 2 * padding];
+    let mut padded_x = vec![0.0; x.len() + 2 * padding + 1]; // +1 for h / 2*up flooring
     padded_x[padding..padding + x.len()].copy_from_slice(x);
 
     // Create output vector
@@ -36,9 +38,9 @@ pub fn upfirdn(h: &[f64], x: &[f64], up: usize, down: usize) -> Vec<f64> {
     for y in target.iter_mut() {
         let p = phase * phase_length;
 
-        *y = RowRef::<f64>::from_slice(&phases[p..p + phase_length])
-            * ColRef::<f64>::from_slice(&padded_x[x_start..x_start + phase_length])
-            * up as f64;
+        *y = RowRef::<f32>::from_slice(&phases[p..p + phase_length])
+            * ColRef::<f32>::from_slice(&padded_x[x_start..x_start + phase_length])
+            * up as f32;
 
         // Update phase and input start index
         x_start += x_step;
