@@ -7,8 +7,8 @@ def test_pystoi_reference(benchmark):
     sr = 8_000
     seconds = 3
     size = seconds * sr
-    x = np.random.random(size).astype(np.float32)
-    y = np.random.random(size).astype(np.float32)
+    x = np.random.randn(size).astype(np.float32)
+    y = np.random.randn(size).astype(np.float32)
     benchmark(stoi, x, y, sr, False)
 
 
@@ -32,8 +32,8 @@ def test_ours(benchmark):
     sr = 8_000
     seconds = 3
     size = seconds * sr
-    x = np.random.random(size).astype(np.float32)
-    y = np.random.random(size).astype(np.float32)
+    x = np.random.randn(size).astype(np.float32)
+    y = np.random.randn(size).astype(np.float32)
     benchmark(stoi, x, y, sr, False)
 
 
@@ -44,8 +44,8 @@ def test_pystoi_reference_batched(benchmark):
     seconds = 3
     size = seconds * sr
     batch_size = 16
-    x = np.random.random((batch_size, size)).astype(np.float32)
-    y = np.random.random((batch_size, size)).astype(np.float32)
+    x = np.random.randn(batch_size, size).astype(np.float32)
+    y = np.random.randn(batch_size, size).astype(np.float32)
 
     def batched_stoi(x, y, sr, extended):
         for x, y in zip(x, y):
@@ -76,6 +76,6 @@ def test_ours_batched(benchmark):
     seconds = 3
     batch_size = 16
     size = seconds * sr
-    x = np.random.random((batch_size, size)).astype(np.float32)
-    y = np.random.random((batch_size, size)).astype(np.float32)
+    x = np.random.randn(batch_size, size).astype(np.float32)
+    y = np.random.randn(batch_size, size).astype(np.float32)
     benchmark(stoi, x, y, sr, False)

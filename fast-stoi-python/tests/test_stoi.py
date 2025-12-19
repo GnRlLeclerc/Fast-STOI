@@ -13,8 +13,8 @@ def test_standard():
     seconds = 3
     for sr in srs:
         for _ in range(100):
-            x = np.random.random(sr * seconds)
-            y = np.random.random(sr * seconds)
+            x = np.random.randn(sr * seconds)
+            y = np.random.randn(sr * seconds)
             values.append(abs(theirs(x, y, fs_sig=sr) - ours(x, y, fs_sig=sr)))
 
-    assert np.array(values).max() < 2e-7
+    assert np.array(values).max() < 1e-7
