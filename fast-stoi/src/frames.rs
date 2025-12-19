@@ -92,7 +92,7 @@ pub fn process_frames(x: &[f32], y: &[f32]) -> (Mat<f32>, Mat<f32>, Col<bool>, u
         // the resulting window that is effectively applied to each frame
         // is a little different.
         let frame_norm = zip!(&x_frame, &FRAME_WINDOWS.hann)
-            .map(|unzip!(x, w)| x * w)
+            .map(|unzip!(x, w)| (x * w).powi(2))
             .sum()
             .sqrt();
 

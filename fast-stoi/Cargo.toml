@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 dashmap = "6.1.0"
-faer = "0.23.2"
+faer = { version = "0.23.2", default-features = false, features = ["std"] }
 lazy_static = "1.5.0"
 num = "0.4.3"
 realfft = "3.5.0"

@@ -12,7 +12,6 @@ use crate::upfirdn::upfirdn;
 lazy_static! {
     /// Cache filters for different from rates
     static ref WINDOWS: DashMap<usize, Vec<f32>> = DashMap::new();
-    static ref DEBUG_FILTER: Vec<f32> = vec![1.0; 501];
 }
 
 const REJECTION_DB: f32 = 60.0;
