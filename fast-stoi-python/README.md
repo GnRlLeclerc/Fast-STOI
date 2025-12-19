@@ -28,6 +28,10 @@ score = stoi(x, y, fs_sig=8_000, extended=False)
 
 ```
 
+> [!NOTE]
+> You can pass 2D arrays of batched waveforms to leverage
+> rust multithreading
+
 Compute STOI with the torch wrapper.
 
 ```python
