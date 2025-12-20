@@ -44,7 +44,8 @@ fn normalize_cols(mat: MatMut<f32>) {
             *x -= mean;
         });
 
-        let norm2 = col.norm_l2() + EPSILON;
+        // NOTE: faer's .norm_l2 is very slow for such small vectors
+        let norm2 = (col.as_ref().iter().map(|x| x * x).sum::<f32>()).sqrt() + EPSILON;
         col.iter_mut().for_each(|x| {
             *x /= norm2;
         });
@@ -59,7 +60,8 @@ fn normalize_rows(mat: MatMut<f32>) {
         row.as_mut().iter_mut().for_each(|x| {
             *x -= mean;
         });
-        let norm2 = row.norm_l2() + EPSILON;
+        // NOTE: faer's .norm_l2 is very slow for such small vectors
+        let norm2 = (row.as_ref().iter().map(|x| x * x).sum::<f32>()).sqrt() + EPSILON;
         row.iter_mut().for_each(|x| {
             *x /= norm2;
         });

@@ -21,7 +21,10 @@ pub fn from_segments(x_segments: MatMut<f32>, y_segments: MatMut<f32>) -> f32 {
         .for_each(|(mut x_segment, mut y_segment)| {
             // Normalize y so that it has the same norm as x
             // and then clip y
-            let ratio = x_segment.norm_l2() / (y_segment.norm_l2() + EPSILON);
+            // NOTE: faer's .norm_l2 is very slow for such small vectors
+            let xnorm2 = (x_segment.as_ref().iter().map(|x| x * x).sum::<f32>()).sqrt() + EPSILON;
+            let ynorm2 = (y_segment.as_ref().iter().map(|x| x * x).sum::<f32>()).sqrt() + EPSILON;
+            let ratio = xnorm2 / (ynorm2 + EPSILON);
             let mut x_sum = 0.0;
             let mut y_sum = 0.0;
             zip!(&x_segment, &mut y_segment).for_each(|unzip!(x, y)| {

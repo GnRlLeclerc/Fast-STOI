@@ -60,13 +60,21 @@ on the batched benchmarks (the overhead of `multiprocessing` is too high).
 
 `torch_stoi` is run on CPU only.
 
-| Implementation | Single |        | Batched  |         |
-| -------------- | ------ | ------ | -------- | ------- |
-| `fast_stoi`    | 1.8 ms |        | 6.1 ms   |         |
-| `torch_stoi`   | 2.2 ms | x 1.22 | 42.4 ms  | x 6.92  |
-| `pystoi`       | 9.7 ms | x 5.5  | 144.7 ms | x 23.65 |
+Standard STOI:
 
-TODO: extended STOI benchmark results (once the implementation is optimized)
+| Implementation | Single |       | Batched  |        |
+| -------------- | ------ | ----- | -------- | ------ |
+| `fast_stoi`    | 1.5 ms |       | 5.3 ms   |        |
+| `torch_stoi`   | 3.2 ms | x 2.1 | 40.0 ms  | x 7.6  |
+| `pystoi`       | 9.6 ms | x 6.4 | 144.7 ms | x 27.5 |
+
+Extended STOI:
+
+| Implementation | Single  |        | Batched  |        |
+| -------------- | ------- | ------ | -------- | ------ |
+| `fast_stoi`    | 1.7 ms  |        | 5.6 ms   |        |
+| `torch_stoi`   | 3.5 ms  | x 2.0  | 41.9 ms  | x 7.5  |
+| `pystoi`       | 20.7 ms | x 12.2 | 257.1 ms | x 46.2 |
 
 ## Develop
 
