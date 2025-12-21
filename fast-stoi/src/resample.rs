@@ -68,11 +68,13 @@ fn generate_filter_phases(up: usize, down: usize) -> Vec<f32> {
 
 /// Polyphase resampling.
 ///
-/// Some information for this doc (reformulate and clean this up later):
+/// About this resampling operation:
 /// - zero-phase => the window is symmetric (does not introduce any shift)
-/// - FIR filter => finite impulse response. Basically, the window is of finite length.
-/// - low-pass => when upsampling by inserting zeros, if we upsample *n, we create
-///   high frequency signals. The window must smooth this out and remove these high frequencies
+/// - FIR filter => finite impulse response.
+///   Basically, the filter window is of finite length.
+/// - low-pass => when upsampling by inserting zeros, if we upsample times n,
+///   we create high frequency signals.
+///   The window must smooth them out and remove these high frequencies
 pub fn resample(x: &[f32], from: usize, to: usize) -> Vec<f32> {
     // Compute upsampling and dowsampling ratios
     let gcd = integer::gcd(from, to);

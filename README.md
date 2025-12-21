@@ -15,23 +15,49 @@ version (which uses a much lighter resampling).
 
 ## Installation
 
-Rust _(TODO: not yet published)_:
+Rust:
 
 ```bash
-cargo add fast_stoi
+cargo add fast-stoi
 ```
 
-Python _(TODO: not yet published)_:
+Python:
 
 ```bash
 pip install fast_stoi
 ```
 
-For development, running tests or running benchmarks:
+## Usage
 
-```bash
-cd fast-stoi-python
-uv sync --all-groups
+Compute STOI from numpy data
+
+```python
+import numpy as np
+from fast_stoi import stoi
+
+x = np.random.random(24_000).astype(np.float32)
+y = np.random.random(24_000).astype(np.float32)
+
+score = stoi(x, y, fs_sig=8_000, extended=False)
+
+```
+
+> [!NOTE]
+> You can pass 2D arrays of batched waveforms to leverage
+> rust multithreading
+
+Compute STOI with the torch wrapper.
+
+```python
+import torch
+from fast_stoi import STOI
+
+stoi = STOI(fs_sig=8_000, extended=False)
+
+x = torch.randn(24_000)
+y = torch.randn(24_000)
+
+score = stoi(x, y)
 ```
 
 ## Optimizations
@@ -77,6 +103,11 @@ Extended STOI:
 | `pystoi`       | 20.7 ms | x 12.2 | 257.1 ms | x 46.2 |
 
 ## Develop
+
+```bash
+cd fast-stoi-python
+uv sync --all-groups
+```
 
 Type checking and linting:
 
